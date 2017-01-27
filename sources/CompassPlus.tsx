@@ -127,6 +127,10 @@ class CompassPlus extends declared(Widget) {
         );
     }
 
+    reset(azimuth: number) {
+        this.view.goTo({heading: azimuth || 0.0});
+    }
+
     private _initialize(containerNode: Element) {
 
         // NODE CONTENT BOX //
@@ -144,6 +148,7 @@ class CompassPlus extends declared(Widget) {
 
         // GROUP - OUTER CIRCLE WITH AZIMUTHS //
         this.parts.outerCircle = this.parts.surface.createGroup();
+        this.parts.outerCircle.on("click", this.reset.bind(this));
 
         // OUTER CIRCLE //
         this.parts.outerCircle.createCircle({
@@ -199,6 +204,7 @@ class CompassPlus extends declared(Widget) {
             }
         }
 
+        // AZIMUTHS //
         let lineStroke = {color: this.style.lineColor, style: "solid", width: this.style.lineWidthMinor};
         for (let azi = 0.0; azi < 360.0; azi += 5.0) {
 
@@ -215,7 +221,7 @@ class CompassPlus extends declared(Widget) {
                 let fontColor = (azi % 45 === 0) ? this.style.fontColorMajor : this.style.fontColorMinor;
                 let labelPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius + 8.0, azi - 5.0);
                 let labelPnt2 = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius + 8.0, azi + 5.0);
-                this.parts.outerCircle.createTextPath({
+                let azimuthLabel = this.parts.outerCircle.createTextPath({
                     align: "middle",
                     text: String(azi),
                     decoration: "none",
@@ -226,6 +232,10 @@ class CompassPlus extends declared(Widget) {
                     style: CompassDefaultFont.style,
                     size: fontSize
                 }).setFill(fontColor);
+
+                azimuthLabel.on("click", function () {
+                    this.reset(azi);
+                }.bind(this));
             }
 
         }
@@ -254,54 +264,6 @@ class CompassPlus extends declared(Widget) {
 
             // HORIZON Y //
             let horizonY = (this.parts.outerRadius * (90.0 - this.view.camera.tilt) / 90.0);
-
-            /*let skyFill = {
-             src: "",
-             type: "linear",
-             x1: 0,
-             y1: 0,
-             x2: 0,
-             y2: this.hudParts.nodeBox.h - this.hudParts.nodeCenter.y - horizonY,
-             colors: [
-             {offset: 0.0, color: "transparent"},
-             {offset: 0.7, color: Color.named.dodgerblue.concat(0.8)},
-             {offset: 1.0, color: Color.named.dodgerblue}
-             ]
-             };
-
-             let groundFill = {
-             src: "",
-             type: "linear",
-             x1: 0,
-             y1: 0,
-             x2: 0,
-             y2:  this.hudParts.nodeCenter.y - horizonY,
-             colors: [
-             {offset: 0.0, color: Color.named.brown},
-             {offset: 0.3, color: Color.named.brown.concat(0.8)},
-             {offset: 1.0, color: "transparent"}
-             ]
-             };
-
-
-             // ABOVE HORIZON //
-             this.hudParts.indicator.createRect({
-             x: 0,
-             y: 0,
-             width: this.hudParts.nodeBox.w,
-             height: this.hudParts.nodeBox.h - this.hudParts.nodeCenter.y - horizonY
-             }).setFill(skyFill).setClip(clipGeometry);
-             //}).setFill(Color.named.dodgerblue.concat(0.5)).setClip(clipGeometry);
-             // BELOW HORIZON //
-             this.hudParts.indicator.createRect({
-             x: 0,
-             y: this.hudParts.nodeCenter.y - horizonY,
-             width: this.hudParts.nodeBox.w,
-             height: this.hudParts.nodeBox.h
-             }).setFill(groundFill).setClip(clipGeometry);
-             //}).setFill(Color.named.brown.concat(0.5)).setClip(clipGeometry);*/
-
-
             // HORIZON LINE //
             this.parts.indicators.createLine({
                 x1: 0,
@@ -309,14 +271,6 @@ class CompassPlus extends declared(Widget) {
                 x2: this.parts.nodeBox.w,
                 y2: this.parts.nodeCenter.y - horizonY
             }).setStroke({color: this.style.horizonColor, style: "dash", width: 1.5}).setClip(clipGeometry);
-
-
-            /* this.hudParts.indicator.createLine({
-             x1: this.hudParts.nodeCenter.x - 200.0,
-             y1: this.hudParts.nodeCenter.y - tiltHeight - 2.0,
-             x2: this.hudParts.nodeCenter.x + 200.0,
-             y2: this.hudParts.nodeCenter.y - tiltHeight - 2.0
-             }).setStroke({color: Color.named.dodgerblue, style: "dash", width: 1.5}).setClip(clipGeometry);*/
 
             // AZIMUTH //
             let arrowWidth = 1.5;
@@ -372,6 +326,7 @@ class CompassPlus extends declared(Widget) {
         }
 
     }
+
 
     private static _pointTo(p: gfx.Point, dist: number, azimuth: number) {
         let radians = (-azimuth + 90.0) * (Math.PI / 180.0);
