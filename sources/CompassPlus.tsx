@@ -127,8 +127,8 @@ class CompassPlus extends declared(Widget) {
         );
     }
 
-    reset(azimuth: number) {
-        this.view.goTo({heading: azimuth || 0.0});
+    reset() {
+        this.view.goTo({heading: 0.0});
     }
 
     private _initialize(containerNode: Element) {

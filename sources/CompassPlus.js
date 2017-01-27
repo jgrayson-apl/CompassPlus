@@ -101,8 +101,8 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             return (widget_1.jsxFactory.createElement("div", {bind: this, class: CSS.base, classes: classes, afterCreate: this._initialize}));
             var _a;
         };
-        CompassPlus.prototype.reset = function (azimuth) {
-            this.view.goTo({ heading: azimuth || 0.0 });
+        CompassPlus.prototype.reset = function () {
+            this.view.goTo({ heading: 0.0 });
         };
         CompassPlus.prototype._initialize = function (containerNode) {
             // NODE CONTENT BOX //
