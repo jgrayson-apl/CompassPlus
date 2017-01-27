@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>My First Custom Esri Widget - 4.2</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.2/esri/css/main.css">
+    <style>
+
+      html,
+      body {
+        width    : 100%;
+        height   : 100%;
+        padding  : 0;
+        margin   : 0;
+        overflow : hidden;
+      }
+
+      #view-node {
+        width  : 100%;
+        height : 100%;
+      }
+
+      .apl-compass-plus {
+        width  : 300px;
+        height : 300px;
+      }
+
+      .apl-compass-plus-larger {
+        width  : 450px;
+        height : 450px;
+      }
+
+      .apl-compass-plus-options {
+        transition : all 1s;
+      }
+
+      .apl-compass-plus-options.expanded {
+        width      : 100%;
+        height     : 100%;
+        background : #fff;
+        transition : all 1s;
+      }
+
+
+    </style>
+    <script>
+      dojoConfig = {
+        packages: [
+          { name: "sources", location: location.href.replace(/index\.html/, "sources") }
+        ]
+      };
+    </script>
+    <script src="https://js.arcgis.com/4.2/"></script>
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/SceneView",
+        "esri/widgets/BasemapToggle",
+        "sources/CompassPlus",
+        "dojo/domReady!"
+      ], function (Map, SceneView, BasemapToggle, CompassPlus) {
+
+
+        let view = new SceneView({
+          map: new Map({
+            basemap: "satellite",
+            ground: "world-elevation"
+          }),
+          container: "view-node"
+        });
+        view.then(function () {
+
+          let basemapToggle = new BasemapToggle({
+            view: view,
+            nextBasemap: "topo"
+          });
+          view.ui.add(basemapToggle, { position: "top-left", index: 0 });
+
+          // DEFAULT //
+          let compassPlus = new CompassPlus({ view: view });
+          view.ui.add(compassPlus, "bottom-left");
+
+          // LARGER SIZE //
+          let compassPlus2 = new CompassPlus({
+            view: view,
+            size: CompassPlus.SIZES.LARGER
+          });
+          view.ui.add(compassPlus2, "bottom-right");
+
+          // DARK THEME //
+          let compassPlus3 = new CompassPlus({
+            view: view,
+            style: CompassPlus.STYLES.DARK
+          });
+          view.ui.add(compassPlus3, "top-right");
+
+        }.bind(this));
+
+      });
+    </script>
+  </head>
+  <body>
+    <div id="view-node"></div>
+  </body>
+</html>
