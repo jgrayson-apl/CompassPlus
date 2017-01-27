@@ -1,0 +1,29 @@
+{
+  "name": "compass-plus",
+  "version": "0.0.1",
+  "description": "Esri SceneView Widget with gfx based compass display that shows azimuth, location, altitude, and scale.",
+  "main": "\\sources\\CompassPluss.js",
+  "dependencies": {
+    "dojo-typings": "^1.11.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jgrayson-apl/CompassPlus.git"
+  },
+  "keywords": [
+    "Esri",
+    "widget",
+    "compass",
+    "gfx"
+  ],
+  "author": "John Grayson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jgrayson-apl/CompassPlus/issues"
+  },
+  "homepage": "https://github.com/jgrayson-apl/CompassPlus#readme"
+}
