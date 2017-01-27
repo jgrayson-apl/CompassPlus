@@ -168,20 +168,20 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             }
             // AZIMUTHS //
             var lineStroke = { color: this.style.lineColor, style: "solid", width: this.style.lineWidthMinor };
-            var _loop_1 = function(azi) {
+            for (var azi = 0.0; azi < 360.0; azi += 5.0) {
                 var lineLength = (azi % 15 === 0) ? 20.0 : 5.0;
-                var outerPnt = CompassPlus._pointTo(this_1.parts.nodeCenter, this_1.parts.outerRadius, azi);
-                var innerPnt = CompassPlus._pointTo(this_1.parts.nodeCenter, this_1.parts.outerRadius - lineLength, azi);
-                this_1.parts.outerCircle.createLine({
+                var outerPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius, azi);
+                var innerPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius - lineLength, azi);
+                this.parts.outerCircle.createLine({
                     x1: outerPnt.x, y1: outerPnt.y,
                     x2: innerPnt.x, y2: innerPnt.y
                 }).setStroke(lineStroke);
                 if (azi % 15 === 0) {
                     var fontSize = (azi % 45 === 0) ? CompassDefaultFont.sizeNormal : CompassDefaultFont.sizeSmallest;
-                    var fontColor = (azi % 45 === 0) ? this_1.style.fontColorMajor : this_1.style.fontColorMinor;
-                    var labelPnt = CompassPlus._pointTo(this_1.parts.nodeCenter, this_1.parts.outerRadius + 8.0, azi - 5.0);
-                    var labelPnt2 = CompassPlus._pointTo(this_1.parts.nodeCenter, this_1.parts.outerRadius + 8.0, azi + 5.0);
-                    var azimuthLabel = this_1.parts.outerCircle.createTextPath({
+                    var fontColor = (azi % 45 === 0) ? this.style.fontColorMajor : this.style.fontColorMinor;
+                    var labelPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius + 8.0, azi - 5.0);
+                    var labelPnt2 = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius + 8.0, azi + 5.0);
+                    this.parts.outerCircle.createTextPath({
                         align: "middle",
                         text: String(azi),
                         decoration: "none",
@@ -192,14 +192,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                         style: CompassDefaultFont.style,
                         size: fontSize
                     }).setFill(fontColor);
-                    azimuthLabel.on("click", function () {
-                        this.reset(azi);
-                    }.bind(this_1));
                 }
-            };
-            var this_1 = this;
-            for (var azi = 0.0; azi < 360.0; azi += 5.0) {
-                _loop_1(azi);
             }
             this._update(this.view.camera.heading);
         };

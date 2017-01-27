@@ -221,7 +221,7 @@ class CompassPlus extends declared(Widget) {
                 let fontColor = (azi % 45 === 0) ? this.style.fontColorMajor : this.style.fontColorMinor;
                 let labelPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius + 8.0, azi - 5.0);
                 let labelPnt2 = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius + 8.0, azi + 5.0);
-                let azimuthLabel = this.parts.outerCircle.createTextPath({
+                this.parts.outerCircle.createTextPath({
                     align: "middle",
                     text: String(azi),
                     decoration: "none",
@@ -232,10 +232,6 @@ class CompassPlus extends declared(Widget) {
                     style: CompassDefaultFont.style,
                     size: fontSize
                 }).setFill(fontColor);
-
-                azimuthLabel.on("click", function () {
-                    this.reset(azi);
-                }.bind(this));
             }
 
         }
