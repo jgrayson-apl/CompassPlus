@@ -21,8 +21,7 @@ import matrix = require("dojox/gfx/matrix");
 
 const CSS = {
     base: "apl-compass-plus",
-    size_larger: "apl-compass-plus-larger",
-    options: "apl-compass-plus-options"
+    size_larger: "apl-compass-plus-larger"
 };
 
 class CompassDefaultFont {
@@ -127,7 +126,7 @@ class CompassPlus extends declared(Widget) {
         );
     }
 
-    reset() {
+    protected reset() {
         this.view.goTo({heading: 0.0});
     }
 

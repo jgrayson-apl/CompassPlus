@@ -15,8 +15,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
     "use strict";
     var CSS = {
         base: "apl-compass-plus",
-        size_larger: "apl-compass-plus-larger",
-        options: "apl-compass-plus-options"
+        size_larger: "apl-compass-plus-larger"
     };
     var CompassDefaultFont = (function () {
         function CompassDefaultFont() {
