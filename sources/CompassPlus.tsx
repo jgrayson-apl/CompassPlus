@@ -13,12 +13,11 @@ import lang = require("dojo/_base/lang");
 import Color = require("dojo/_base/Color");
 import colors = require("dojo/colors");
 import dojoNumber = require("dojo/number");
+import domClass = require("dojo/dom-class");
 import domGeom = require("dojo/dom-geometry");
 
 import gfx = require("dojox/gfx");
 import matrix = require("dojox/gfx/matrix");
-import number = require("dojo/number");
-import domClass = require("dojo/dom-class");
 
 const CSS = {
     base: "apl-compass-plus",
