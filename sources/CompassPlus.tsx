@@ -11,10 +11,11 @@ import {renderable, jsxFactory} from "esri/widgets/support/widget";
 import SceneView = require("esri/views/SceneView");
 
 // DOJO //
-import Color = require("dojo/colors");
+import Color = require("dojo/colors");  // THIS WILL ALSO IMPORT THE CSS3 'named' COLORS...
 import lang = require("dojo/_base/lang");
 import dojoNumber = require("dojo/number");
 import domGeom = require("dojo/dom-geometry");
+
 // DOJOX //
 import gfx = require("dojox/gfx");
 import matrix = require("dojox/gfx/matrix");
