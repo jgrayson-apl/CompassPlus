@@ -11,12 +11,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/core/tsSupport/decorateHelper", "esri/core/accessorSupport/decorators", "esri/widgets/Widget", "esri/core/watchUtils", "esri/widgets/support/widget", "dojo/_base/lang", "dojo/_base/Color", "dojo/number", "dojo/dom-geometry", "dojox/gfx", "dojox/gfx/matrix"], function (require, exports, __extends, __decorate, decorators_1, Widget, watchUtils, widget_1, lang, Color, dojoNumber, domGeom, gfx, matrix) {
+define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/core/tsSupport/decorateHelper", "esri/core/accessorSupport/decorators", "esri/widgets/Widget", "esri/core/watchUtils", "esri/widgets/support/widget", "dojo/_base/lang", "dojo/colors", "dojo/number", "dojo/dom-geometry", "dojox/gfx", "dojox/gfx/matrix"], function (require, exports, __extends, __decorate, decorators_1, Widget, watchUtils, widget_1, lang, Color, dojoNumber, domGeom, gfx, matrix) {
     "use strict";
+    // WIDGET CSS //
     var CSS = {
         base: "apl-compass-plus",
         size_larger: "apl-compass-plus-larger"
     };
+    // DEFAULT FONT //
     var CompassDefaultFont = (function () {
         function CompassDefaultFont() {
         }
@@ -29,6 +31,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
         CompassDefaultFont.sizeSmallest = "7pt";
         return CompassDefaultFont;
     }());
+    // DEFAULT STYLE //
     var CompassDefaultStyle = (function () {
         function CompassDefaultStyle() {
             // FONTS //
@@ -54,26 +57,25 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             this.fontColorMajor = Color.named.white;
             this.fontColorMinor = Color.named.whitesmoke;
             this.fillColor = Color.named.white.concat(0.2);
-            this.lineColor = Color.named.limegreen.concat(0.8);
+            this.lineColor = Color.named.limegreen;
             this.indicatorColor = Color.named.yellow;
             this.horizonColor = Color.named.darkred;
         }
         return CompassDefaultStyle;
     }());
+    // DARK STYLE //
     var CompassDarkStyle = (function (_super) {
         __extends(CompassDarkStyle, _super);
         function CompassDarkStyle() {
             _super.apply(this, arguments);
-            // COLORS //
+            // DARK STYLE COLORS OVERRIDE //
             this.fontColorMajor = Color.named.black;
             this.fontColorMinor = Color.named.darkgray;
-            this.fillColor = Color.named.silver.concat(0.2);
-            this.lineColor = Color.named.limegreen.concat(0.8);
             this.indicatorColor = Color.named.darkgoldenrod;
-            this.horizonColor = Color.named.darkred;
         }
         return CompassDarkStyle;
     }(CompassDefaultStyle));
+    // COMPASS PARTS //
     var CompassParts = (function () {
         function CompassParts() {
         }
@@ -100,9 +102,11 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             return (widget_1.jsxFactory.createElement("div", {bind: this, class: CSS.base, classes: classes, afterCreate: this._initialize}));
             var _a;
         };
+        // RESET HEADING //
         CompassPlus.prototype.reset = function () {
             this.view.goTo({ heading: 0.0 });
         };
+        // INITIALIZE //
         CompassPlus.prototype._initialize = function (containerNode) {
             // NODE CONTENT BOX //
             this.parts.nodeBox = domGeom.getContentBox(containerNode);
@@ -195,6 +199,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             }
             this._update(this.view.camera.heading);
         };
+        // UPDATE OUTER CIRCLE AND INDICATORS //
         CompassPlus.prototype._update = function (heading) {
             // UPDATE OUTER CIRCLE //
             if (this.parts.outerCircle) {
@@ -270,6 +275,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
             }
         };
+        // CALCULATE LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH //
         CompassPlus._pointTo = function (p, dist, azimuth) {
             var radians = (-azimuth + 90.0) * (Math.PI / 180.0);
             return {
@@ -277,11 +283,14 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 y: p.y - Math.sin(radians) * dist
             };
         };
+        // VERSION  //
         CompassPlus.version = "0.0.1";
+        // SIZES //
         CompassPlus.SIZES = {
             DEFAULT: 0,
             LARGER: 1
         };
+        // STYLES //
         CompassPlus.STYLES = {
             DEFAULT: new CompassDefaultStyle(),
             DARK: new CompassDarkStyle()

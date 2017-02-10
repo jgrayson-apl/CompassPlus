@@ -1,6 +1,7 @@
 /// <amd-dependency path="esri/core/tsSupport/declareExtendsHelper" name="__extends" />
 /// <amd-dependency path="esri/core/tsSupport/decorateHelper" name="__decorate" />
 
+
 import {subclass, declared, property} from "esri/core/accessorSupport/decorators";
 
 import Widget = require("esri/widgets/Widget");
@@ -10,20 +11,20 @@ import {renderable, jsxFactory} from "esri/widgets/support/widget";
 import SceneView = require("esri/views/SceneView");
 
 import lang = require("dojo/_base/lang");
-import Color = require("dojo/_base/Color");
-import colors = require("dojo/colors");
+import Color = require("dojo/colors");
 import dojoNumber = require("dojo/number");
-import domClass = require("dojo/dom-class");
 import domGeom = require("dojo/dom-geometry");
 
 import gfx = require("dojox/gfx");
 import matrix = require("dojox/gfx/matrix");
 
+// WIDGET CSS //
 const CSS = {
     base: "apl-compass-plus",
     size_larger: "apl-compass-plus-larger"
 };
 
+// DEFAULT FONT //
 class CompassDefaultFont {
     static family: string = "Avenir Next W00";
     static style: string = "bold";
@@ -34,7 +35,9 @@ class CompassDefaultFont {
     static sizeSmallest: string = "7pt";
 }
 
+// DEFAULT STYLE //
 class CompassDefaultStyle {
+
     // FONTS //
     indicatorFont: gfx.Font = {
         family: CompassDefaultFont.family,
@@ -57,22 +60,21 @@ class CompassDefaultStyle {
     // COLORS //
     fontColorMajor: gfx.ColorLike = Color.named.white;
     fontColorMinor: gfx.ColorLike = Color.named.whitesmoke;
-    fillColor: gfx.ColorLike = Color.named.white.concat(0.2) as gfx.ColorLike;
-    lineColor: gfx.ColorLike = Color.named.limegreen.concat(0.8) as gfx.ColorLike;
+    fillColor: gfx.ColorLike = (Color.named.white.concat(0.2) as dojo._base.ColorValueAlpha) as gfx.ColorLike;
+    lineColor: gfx.ColorLike = Color.named.limegreen;
     indicatorColor: gfx.ColorLike = Color.named.yellow;
     horizonColor: gfx.ColorLike = Color.named.darkred;
 }
 
+// DARK STYLE //
 class CompassDarkStyle extends CompassDefaultStyle {
-    // COLORS //
+    // DARK STYLE COLORS OVERRIDE //
     fontColorMajor: gfx.ColorLike = Color.named.black;
     fontColorMinor: gfx.ColorLike = Color.named.darkgray;
-    fillColor: gfx.ColorLike = Color.named.silver.concat(0.2) as gfx.ColorLike;
-    lineColor: gfx.ColorLike = Color.named.limegreen.concat(0.8) as gfx.ColorLike;
     indicatorColor: gfx.ColorLike = Color.named.darkgoldenrod;
-    horizonColor: gfx.ColorLike = Color.named.darkred;
 }
 
+// COMPASS PARTS //
 class CompassParts {
     nodeBox: dojo.DomGeometryBox;
     nodeCenter: gfx.Point;
@@ -85,30 +87,32 @@ class CompassParts {
 
 @subclass("apl.widgets.CompassPlus")
 class CompassPlus extends declared(Widget) {
+    // VERSION  //
+    public static version: string = "0.0.1";
 
-    static version: string = "0.0.1";
-
-    static SIZES = {
+    // SIZES //
+    public static SIZES = {
         DEFAULT: 0,
         LARGER: 1
     };
 
-    static STYLES = {
+    // STYLES //
+    public static STYLES = {
         DEFAULT: new CompassDefaultStyle(),
         DARK: new CompassDarkStyle()
     };
 
     @property()
-    view: SceneView;
+    public view: SceneView;
 
     @property()
-    size: number = CompassPlus.SIZES.DEFAULT;
+    public size: number = CompassPlus.SIZES.DEFAULT;
 
     @property()
-    style: CompassDefaultStyle = CompassPlus.STYLES.DEFAULT;
+    public style: CompassDefaultStyle = CompassPlus.STYLES.DEFAULT;
 
     @property()
-    parts: CompassParts = new CompassParts();
+    private parts: CompassParts = new CompassParts();
 
     postInitialize() {
         // CAMERA HEADING //
@@ -126,10 +130,12 @@ class CompassPlus extends declared(Widget) {
         );
     }
 
+    // RESET HEADING //
     protected reset() {
         this.view.goTo({heading: 0.0});
     }
 
+    // INITIALIZE //
     private _initialize(containerNode: Element) {
 
         // NODE CONTENT BOX //
@@ -238,6 +244,7 @@ class CompassPlus extends declared(Widget) {
         this._update(this.view.camera.heading);
     }
 
+    // UPDATE OUTER CIRCLE AND INDICATORS //
     private _update(heading: number) {
 
         // UPDATE OUTER CIRCLE //
@@ -322,7 +329,7 @@ class CompassPlus extends declared(Widget) {
 
     }
 
-
+    // CALCULATE LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH //
     private static _pointTo(p: gfx.Point, dist: number, azimuth: number) {
         let radians = (-azimuth + 90.0) * (Math.PI / 180.0);
         return {
