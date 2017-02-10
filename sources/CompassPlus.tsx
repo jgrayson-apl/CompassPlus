@@ -1,20 +1,21 @@
 /// <amd-dependency path="esri/core/tsSupport/declareExtendsHelper" name="__extends" />
 /// <amd-dependency path="esri/core/tsSupport/decorateHelper" name="__decorate" />
 
-
+// ESRI WIDGET //
 import {subclass, declared, property} from "esri/core/accessorSupport/decorators";
-
 import Widget = require("esri/widgets/Widget");
 import watchUtils = require("esri/core/watchUtils");
 import {renderable, jsxFactory} from "esri/widgets/support/widget";
 
+// ESRI SCENEVIEW //
 import SceneView = require("esri/views/SceneView");
 
-import lang = require("dojo/_base/lang");
+// DOJO //
 import Color = require("dojo/colors");
+import lang = require("dojo/_base/lang");
 import dojoNumber = require("dojo/number");
 import domGeom = require("dojo/dom-geometry");
-
+// DOJOX //
 import gfx = require("dojox/gfx");
 import matrix = require("dojox/gfx/matrix");
 
@@ -84,7 +85,7 @@ class CompassParts {
     outerCircle: gfx.Group;
 }
 
-
+// COMPASS PLUS WIDGET //
 @subclass("apl.widgets.CompassPlus")
 class CompassPlus extends declared(Widget) {
     // VERSION  //
@@ -114,11 +115,13 @@ class CompassPlus extends declared(Widget) {
     @property()
     private parts: CompassParts = new CompassParts();
 
+    // POST INITIALIZE //
     postInitialize() {
         // CAMERA HEADING //
         watchUtils.init(this, "view.camera.heading", (heading) => this._update(heading));
     }
 
+    // JSX RENDER //
     render() {
 
         const classes = {
@@ -126,7 +129,7 @@ class CompassPlus extends declared(Widget) {
         };
 
         return (
-            <div bind={this} class={CSS.base} classes={classes} afterCreate={this._initialize}></div>
+            <div bind={this} class={CSS.base} classes={classes} afterCreate={this._initializeCompass}></div>
         );
     }
 
@@ -135,8 +138,8 @@ class CompassPlus extends declared(Widget) {
         this.view.goTo({heading: 0.0});
     }
 
-    // INITIALIZE //
-    private _initialize(containerNode: Element) {
+    // INITIALIZE COMPASS //
+    private _initializeCompass(containerNode: Element) {
 
         // NODE CONTENT BOX //
         this.parts.nodeBox = domGeom.getContentBox(containerNode);
@@ -339,5 +342,4 @@ class CompassPlus extends declared(Widget) {
     }
 
 }
-
 export = CompassPlus;

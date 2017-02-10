@@ -11,7 +11,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/core/tsSupport/decorateHelper", "esri/core/accessorSupport/decorators", "esri/widgets/Widget", "esri/core/watchUtils", "esri/widgets/support/widget", "dojo/_base/lang", "dojo/colors", "dojo/number", "dojo/dom-geometry", "dojox/gfx", "dojox/gfx/matrix"], function (require, exports, __extends, __decorate, decorators_1, Widget, watchUtils, widget_1, lang, Color, dojoNumber, domGeom, gfx, matrix) {
+define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/core/tsSupport/decorateHelper", "esri/core/accessorSupport/decorators", "esri/widgets/Widget", "esri/core/watchUtils", "esri/widgets/support/widget", "dojo/colors", "dojo/_base/lang", "dojo/number", "dojo/dom-geometry", "dojox/gfx", "dojox/gfx/matrix"], function (require, exports, __extends, __decorate, decorators_1, Widget, watchUtils, widget_1, Color, lang, dojoNumber, domGeom, gfx, matrix) {
     "use strict";
     // WIDGET CSS //
     var CSS = {
@@ -81,6 +81,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
         }
         return CompassParts;
     }());
+    // COMPASS PLUS WIDGET //
     var CompassPlus = (function (_super) {
         __extends(CompassPlus, _super);
         function CompassPlus() {
@@ -89,25 +90,27 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             this.style = CompassPlus.STYLES.DEFAULT;
             this.parts = new CompassParts();
         }
+        // POST INITIALIZE //
         CompassPlus.prototype.postInitialize = function () {
             var _this = this;
             // CAMERA HEADING //
             watchUtils.init(this, "view.camera.heading", function (heading) { return _this._update(heading); });
         };
+        // JSX RENDER //
         CompassPlus.prototype.render = function () {
             var classes = (_a = {},
                 _a[CSS.size_larger] = (this.size === CompassPlus.SIZES.LARGER),
                 _a
             );
-            return (widget_1.jsxFactory.createElement("div", {bind: this, class: CSS.base, classes: classes, afterCreate: this._initialize}));
+            return (widget_1.jsxFactory.createElement("div", {bind: this, class: CSS.base, classes: classes, afterCreate: this._initializeCompass}));
             var _a;
         };
         // RESET HEADING //
         CompassPlus.prototype.reset = function () {
             this.view.goTo({ heading: 0.0 });
         };
-        // INITIALIZE //
-        CompassPlus.prototype._initialize = function (containerNode) {
+        // INITIALIZE COMPASS //
+        CompassPlus.prototype._initializeCompass = function (containerNode) {
             // NODE CONTENT BOX //
             this.parts.nodeBox = domGeom.getContentBox(containerNode);
             // CENTER AND RADIUS //
