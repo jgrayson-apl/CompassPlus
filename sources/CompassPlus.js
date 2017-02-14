@@ -85,16 +85,30 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
     var CompassPlus = (function (_super) {
         __extends(CompassPlus, _super);
         function CompassPlus() {
-            _super.apply(this, arguments);
+            _super.call(this);
             this.size = CompassPlus.SIZES.DEFAULT;
-            this.style = CompassPlus.STYLES.DEFAULT;
-            this.parts = new CompassParts();
+            this._parts = new CompassParts();
+            this._ready = false;
         }
+        Object.defineProperty(CompassPlus.prototype, "style", {
+            get: function () {
+                return this._get("style");
+            },
+            set: function (value) {
+                var oldValue = this._get("style");
+                if (oldValue !== value) {
+                    this._set("style", value);
+                    this._styleUpdate();
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
         // POST INITIALIZE //
         CompassPlus.prototype.postInitialize = function () {
             var _this = this;
             // CAMERA HEADING //
-            watchUtils.init(this, "view.camera.heading", function (heading) { return _this._update(heading); });
+            watchUtils.init(this, "view.camera.heading", function (heading) { return _this._updateIndicators(heading); });
         };
         // JSX RENDER //
         CompassPlus.prototype.render = function () {
@@ -112,31 +126,52 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
         // INITIALIZE COMPASS //
         CompassPlus.prototype._initializeCompass = function (containerNode) {
             // NODE CONTENT BOX //
-            this.parts.nodeBox = domGeom.getContentBox(containerNode);
+            this._parts.nodeBox = domGeom.getContentBox(containerNode);
             // CENTER AND RADIUS //
-            this.parts.nodeCenter = { x: this.parts.nodeBox.w * 0.5, y: this.parts.nodeBox.h * 0.5 };
-            this.parts.outerRadius = (this.parts.nodeBox.h * 0.4);
+            this._parts.nodeCenter = { x: this._parts.nodeBox.w * 0.5, y: this._parts.nodeBox.h * 0.5 };
+            this._parts.outerRadius = (this._parts.nodeBox.h * 0.4);
             // GFX SURFACE //
-            this.parts.surface = gfx.createSurface(containerNode, this.parts.nodeBox.w, this.parts.nodeBox.h);
+            this._parts.surface = gfx.createSurface(containerNode, this._parts.nodeBox.w, this._parts.nodeBox.h);
             // GROUP - INDICATORS: AZIMUTH, HORIZON, COORDINATES, ALTITUDE, SCALE //
-            this.parts.indicators = this.parts.surface.createGroup();
+            this._parts.indicators = this._parts.surface.createGroup();
             // GROUP - OUTER CIRCLE WITH AZIMUTHS //
-            this.parts.outerCircle = this.parts.surface.createGroup();
-            this.parts.outerCircle.on("click", this.reset.bind(this));
+            this._parts.outerCircle = this._parts.surface.createGroup();
+            this._parts.outerCircle.on("click", this.reset.bind(this));
+            // CREATE OUTER CIRCLE //
+            this._createOuterCircle();
+            // UPDATE INDICATORS //
+            this._updateIndicators(this.view.camera.heading);
+            // READY //
+            this._ready = true;
+        };
+        CompassPlus.prototype._styleUpdate = function () {
+            if (this._ready) {
+                // CREATE OUTER CIRCLE //
+                this._createOuterCircle();
+                // UPDATE INDICATORS //
+                this._updateIndicators(this.view.camera.heading);
+                // SCHEDULE RENDERER //
+                this.scheduleRender();
+            }
+        };
+        CompassPlus.prototype._createOuterCircle = function () {
+            if (this._parts.outerCircle) {
+                this._parts.outerCircle.clear();
+            }
             // OUTER CIRCLE //
-            this.parts.outerCircle.createCircle({
-                cx: this.parts.nodeCenter.x,
-                cy: this.parts.nodeCenter.y,
-                r: this.parts.outerRadius
+            this._parts.outerCircle.createCircle({
+                cx: this._parts.nodeCenter.x,
+                cy: this._parts.nodeCenter.y,
+                r: this._parts.outerRadius
             }).setStroke({
                 color: this.style.lineColor,
                 style: "solid",
                 width: this.style.lineWidthMajor
             }).setFill(this.style.fillColor);
             // CENTER //
-            this.parts.outerCircle.createCircle({
-                cx: this.parts.nodeCenter.x,
-                cy: this.parts.nodeCenter.y,
+            this._parts.outerCircle.createCircle({
+                cx: this._parts.nodeCenter.x,
+                cy: this._parts.nodeCenter.y,
                 r: 5.0
             }).setFill(this.style.lineColor);
             /*var centerLength = 40.0;
@@ -160,9 +195,9 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             for (var direction in directions) {
                 if (directions.hasOwnProperty(direction)) {
                     var directionAzi = directions[direction];
-                    var directionLabelPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius - 40.0, directionAzi - 5.0);
-                    var directionLabelPnt2 = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius - 40.0, directionAzi + 5.0);
-                    this.parts.outerCircle.createTextPath({
+                    var directionLabelPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius - 40.0, directionAzi - 5.0);
+                    var directionLabelPnt2 = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius - 40.0, directionAzi + 5.0);
+                    this._parts.outerCircle.createTextPath({
                         decoration: "none",
                         kerning: true,
                         rotated: false,
@@ -176,18 +211,18 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             var lineStroke = { color: this.style.lineColor, style: "solid", width: this.style.lineWidthMinor };
             for (var azi = 0.0; azi < 360.0; azi += 5.0) {
                 var lineLength = (azi % 15 === 0) ? 20.0 : 5.0;
-                var outerPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius, azi);
-                var innerPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius - lineLength, azi);
-                this.parts.outerCircle.createLine({
+                var outerPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius, azi);
+                var innerPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius - lineLength, azi);
+                this._parts.outerCircle.createLine({
                     x1: outerPnt.x, y1: outerPnt.y,
                     x2: innerPnt.x, y2: innerPnt.y
                 }).setStroke(lineStroke);
                 if (azi % 15 === 0) {
                     var fontSize = (azi % 45 === 0) ? CompassDefaultFont.sizeNormal : CompassDefaultFont.sizeSmallest;
                     var fontColor = (azi % 45 === 0) ? this.style.fontColorMajor : this.style.fontColorMinor;
-                    var labelPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius + 8.0, azi - 5.0);
-                    var labelPnt2 = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius + 8.0, azi + 5.0);
-                    this.parts.outerCircle.createTextPath({
+                    var labelPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius + 8.0, azi - 5.0);
+                    var labelPnt2 = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius + 8.0, azi + 5.0);
+                    this._parts.outerCircle.createTextPath({
                         align: "middle",
                         text: String(azi),
                         decoration: "none",
@@ -200,44 +235,43 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                     }).setFill(fontColor);
                 }
             }
-            this._update(this.view.camera.heading);
         };
         // UPDATE OUTER CIRCLE AND INDICATORS //
-        CompassPlus.prototype._update = function (heading) {
+        CompassPlus.prototype._updateIndicators = function (heading) {
             // UPDATE OUTER CIRCLE //
-            if (this.parts.outerCircle) {
-                this.parts.outerCircle.setTransform(matrix.rotategAt(-heading, this.parts.nodeCenter));
+            if (this._parts.outerCircle) {
+                this._parts.outerCircle.setTransform(matrix.rotategAt(-heading, this._parts.nodeCenter));
             }
             // UPDATE INDICATORS //
-            if (this.parts.indicators) {
-                this.parts.indicators.clear();
+            if (this._parts.indicators) {
+                this._parts.indicators.clear();
                 // CLIP GEOMETRY //
                 var clipGeometry = {
-                    cx: this.parts.nodeCenter.x,
-                    cy: this.parts.nodeCenter.y,
-                    rx: this.parts.outerRadius,
-                    ry: this.parts.outerRadius
+                    cx: this._parts.nodeCenter.x,
+                    cy: this._parts.nodeCenter.y,
+                    rx: this._parts.outerRadius,
+                    ry: this._parts.outerRadius
                 };
                 // HORIZON Y //
-                var horizonY = (this.parts.outerRadius * (90.0 - this.view.camera.tilt) / 90.0);
+                var horizonY = (this._parts.outerRadius * (90.0 - this.view.camera.tilt) / 90.0);
                 // HORIZON LINE //
-                this.parts.indicators.createLine({
+                this._parts.indicators.createLine({
                     x1: 0,
-                    y1: this.parts.nodeCenter.y - horizonY,
-                    x2: this.parts.nodeBox.w,
-                    y2: this.parts.nodeCenter.y - horizonY
+                    y1: this._parts.nodeCenter.y - horizonY,
+                    x2: this._parts.nodeBox.w,
+                    y2: this._parts.nodeCenter.y - horizonY
                 }).setStroke({ color: this.style.horizonColor, style: "dash", width: 1.5 }).setClip(clipGeometry);
                 // AZIMUTH //
                 var arrowWidth = 1.5;
-                var indicatorPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius, 0.0);
-                var indicatorLabelPnt = CompassPlus._pointTo(this.parts.nodeCenter, this.parts.outerRadius - 75.0, 0.0);
-                this.parts.indicators.createLine({
+                var indicatorPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius, 0.0);
+                var indicatorLabelPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius - 75.0, 0.0);
+                this._parts.indicators.createLine({
                     x1: indicatorPnt.x,
                     y1: indicatorPnt.y,
                     x2: indicatorLabelPnt.x,
                     y2: indicatorLabelPnt.y - 20.0
                 }).setStroke({ color: this.style.indicatorColor, style: "dot", width: arrowWidth });
-                this.parts.indicators.createText({
+                this._parts.indicators.createText({
                     x: indicatorLabelPnt.x,
                     y: indicatorLabelPnt.y,
                     align: "middle",
@@ -253,25 +287,25 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                     scale: dojoNumber.format(this.view.scale, { places: 0 })
                 };
                 // COORDINATE TEXT //
-                this.parts.indicators.createText({
-                    x: this.parts.nodeCenter.x,
-                    y: this.parts.nodeCenter.y + 25.0,
+                this._parts.indicators.createText({
+                    x: this._parts.nodeCenter.x,
+                    y: this._parts.nodeCenter.y + 25.0,
                     align: "middle",
                     text: lang.replace("{lon}, {lat}", coordinateInfo),
                     kerning: true
                 }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
                 // ALTITUDE TEXT //
-                this.parts.indicators.createText({
-                    x: this.parts.nodeCenter.x,
-                    y: this.parts.nodeCenter.y + 40.0,
+                this._parts.indicators.createText({
+                    x: this._parts.nodeCenter.x,
+                    y: this._parts.nodeCenter.y + 40.0,
                     align: "middle",
                     text: lang.replace("{alt} m", coordinateInfo),
                     kerning: true
                 }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
                 // SCALE TEXT //
-                this.parts.indicators.createText({
-                    x: this.parts.nodeCenter.x,
-                    y: this.parts.nodeCenter.y + 55.0,
+                this._parts.indicators.createText({
+                    x: this._parts.nodeCenter.x,
+                    y: this._parts.nodeCenter.y + 55.0,
                     align: "middle",
                     text: lang.replace("1: {scale}", coordinateInfo),
                     kerning: true
@@ -306,10 +340,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
         ], CompassPlus.prototype, "size", void 0);
         __decorate([
             decorators_1.property()
-        ], CompassPlus.prototype, "style", void 0);
-        __decorate([
-            decorators_1.property()
-        ], CompassPlus.prototype, "parts", void 0);
+        ], CompassPlus.prototype, "style", null);
         CompassPlus = __decorate([
             decorators_1.subclass("apl.widgets.CompassPlus")
         ], CompassPlus);
