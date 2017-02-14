@@ -312,7 +312,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
             }
         };
-        // CALCULATE LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH //
+        // CALCULATE END LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH //
         CompassPlus._pointTo = function (p, dist, azimuth) {
             var radians = (-azimuth + 90.0) * (Math.PI / 180.0);
             return {

@@ -375,7 +375,7 @@ class CompassPlus extends declared(Widget) {
 
     }
 
-    // CALCULATE LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH //
+    // CALCULATE END LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH //
     private static _pointTo(p: gfx.Point, dist: number, azimuth: number): gfx.Point {
         let radians = (-azimuth + 90.0) * (Math.PI / 180.0);
         return {
