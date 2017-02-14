@@ -11,7 +11,7 @@ import {renderable, jsxFactory} from "esri/widgets/support/widget";
 import SceneView = require("esri/views/SceneView");
 
 // DOJO //
-import Color = require("dojo/colors");  // THIS WILL ALSO IMPORT THE CSS3 'named' COLORS...
+import Color = require("dojo/colors");  // THIS WILL PROVIDE dojo./base/Color AND ALSO THE CSS3 'named' COLORS...
 import lang = require("dojo/_base/lang");
 import dojoNumber = require("dojo/number");
 import domGeom = require("dojo/dom-geometry");
@@ -116,11 +116,10 @@ class CompassPlus extends declared(Widget) {
     }
 
     set style(value: CompassDefaultStyle) {
-
         const oldValue = this._get<CompassDefaultStyle>("style");
         if (oldValue !== value) {
             this._set("style", value);
-            this._styleUpdate();            
+            this._styleUpdated();
         }
     }
 
@@ -176,7 +175,7 @@ class CompassPlus extends declared(Widget) {
         this._parts.outerCircle.on("click", this.reset.bind(this));
 
         // CREATE OUTER CIRCLE //
-        this._createOuterCircle();
+        this._updateOuterCircle();
         // UPDATE INDICATORS //
         this._updateIndicators(this.view.camera.heading);
 
@@ -185,10 +184,10 @@ class CompassPlus extends declared(Widget) {
     }
 
 
-    private _styleUpdate(): void {
+    private _styleUpdated(): void {
         if (this._ready) {
             // CREATE OUTER CIRCLE //
-            this._createOuterCircle();
+            this._updateOuterCircle();
             // UPDATE INDICATORS //
             this._updateIndicators(this.view.camera.heading);
             // SCHEDULE RENDERER //
@@ -196,7 +195,7 @@ class CompassPlus extends declared(Widget) {
         }
     }
 
-    private _createOuterCircle(): void {
+    private _updateOuterCircle(): void {
 
         if (this._parts.outerCircle) {
             this._parts.outerCircle.clear();

@@ -98,7 +98,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 var oldValue = this._get("style");
                 if (oldValue !== value) {
                     this._set("style", value);
-                    this._styleUpdate();
+                    this._styleUpdated();
                 }
             },
             enumerable: true,
@@ -138,23 +138,23 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             this._parts.outerCircle = this._parts.surface.createGroup();
             this._parts.outerCircle.on("click", this.reset.bind(this));
             // CREATE OUTER CIRCLE //
-            this._createOuterCircle();
+            this._updateOuterCircle();
             // UPDATE INDICATORS //
             this._updateIndicators(this.view.camera.heading);
             // READY //
             this._ready = true;
         };
-        CompassPlus.prototype._styleUpdate = function () {
+        CompassPlus.prototype._styleUpdated = function () {
             if (this._ready) {
                 // CREATE OUTER CIRCLE //
-                this._createOuterCircle();
+                this._updateOuterCircle();
                 // UPDATE INDICATORS //
                 this._updateIndicators(this.view.camera.heading);
                 // SCHEDULE RENDERER //
                 this.scheduleRender();
             }
         };
-        CompassPlus.prototype._createOuterCircle = function () {
+        CompassPlus.prototype._updateOuterCircle = function () {
             if (this._parts.outerCircle) {
                 this._parts.outerCircle.clear();
             }
