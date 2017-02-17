@@ -23,7 +23,8 @@ import matrix = require("dojox/gfx/matrix");
 // WIDGET CSS //
 const CSS = {
     base: "apl-compass-plus",
-    size_larger: "apl-compass-plus-larger"
+    size_larger: "apl-compass-plus-larger",
+    not_visible: "apl-compass-plus-hidden"
 };
 
 // DEFAULT FONT //
@@ -89,6 +90,7 @@ class CompassParts {
 // COMPASS PLUS WIDGET //
 @subclass("apl.widgets.CompassPlus")
 class CompassPlus extends declared(Widget) {
+
     // VERSION  //
     public static version: string = "0.0.1";
 
@@ -104,32 +106,42 @@ class CompassPlus extends declared(Widget) {
         DARK: new CompassDarkStyle()
     };
 
+    // VISIBLE //
     @property()
-    public view: SceneView;
+    @renderable()
+    public visible: boolean = true;
 
+    // VIEW //
+    @property()
+    public view: SceneView = null;
+
+    // SIZE //
     @property()
     public size: number = CompassPlus.SIZES.DEFAULT;
 
+    // STYLE //
+    private _style: CompassDefaultStyle = new CompassDefaultStyle();
+
+    // STYLE //
     @property()
-    get style(): CompassDefaultStyle {
-        return this._get("style");
+    public get style(): CompassDefaultStyle {
+        return this._style;
     }
 
-    set style(value: CompassDefaultStyle) {
+    public set style(value: CompassDefaultStyle) {
         const oldValue = this._get<CompassDefaultStyle>("style");
         if (oldValue !== value) {
             this._set("style", value);
+            this._style = value;
             this._styleUpdated();
         }
     }
 
+    // GFX PARTS //
     private _parts: CompassParts = new CompassParts();
 
+    // WIDGET READY //
     private _ready: boolean = false;
-
-    constructor() {
-        super();
-    }
 
     // POST INITIALIZE //
     postInitialize() {
@@ -141,6 +153,7 @@ class CompassPlus extends declared(Widget) {
     render() {
 
         const classes = {
+            [CSS.not_visible]: (!this.visible),
             [CSS.size_larger]: (this.size === CompassPlus.SIZES.LARGER)
         };
 
@@ -207,17 +220,17 @@ class CompassPlus extends declared(Widget) {
             cy: this._parts.nodeCenter.y,
             r: this._parts.outerRadius
         }).setStroke({
-            color: this.style.lineColor,
+            color: this._style.lineColor,
             style: "solid",
-            width: this.style.lineWidthMajor
-        }).setFill(this.style.fillColor);
+            width: this._style.lineWidthMajor
+        }).setFill(this._style.fillColor);
 
         // CENTER //
         this._parts.outerCircle.createCircle({
             cx: this._parts.nodeCenter.x,
             cy: this._parts.nodeCenter.y,
             r: 5.0
-        }).setFill(this.style.lineColor);
+        }).setFill(this._style.lineColor);
 
         /*var centerLength = 40.0;
          var centerWidth = 2.0;
@@ -251,12 +264,12 @@ class CompassPlus extends declared(Widget) {
                     align: "middle",
                     text: direction,
                 }).moveTo(directionLabelPnt.x, directionLabelPnt.y).lineTo(directionLabelPnt2.x, directionLabelPnt2.y)
-                    .setFont(this.style.directionFont).setFill(this.style.fontColorMajor);
+                    .setFont(this._style.directionFont).setFill(this._style.fontColorMajor);
             }
         }
 
         // AZIMUTHS //
-        let lineStroke = {color: this.style.lineColor, style: "solid", width: this.style.lineWidthMinor};
+        let lineStroke = {color: this._style.lineColor, style: "solid", width: this._style.lineWidthMinor};
         for (let azi = 0.0; azi < 360.0; azi += 5.0) {
 
             let lineLength = (azi % 15 === 0) ? 20.0 : 5.0;
@@ -269,7 +282,7 @@ class CompassPlus extends declared(Widget) {
 
             if (azi % 15 === 0) {
                 let fontSize = (azi % 45 === 0) ? CompassDefaultFont.sizeNormal : CompassDefaultFont.sizeSmallest;
-                let fontColor = (azi % 45 === 0) ? this.style.fontColorMajor : this.style.fontColorMinor;
+                let fontColor = (azi % 45 === 0) ? this._style.fontColorMajor : this._style.fontColorMinor;
                 let labelPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius + 8.0, azi - 5.0);
                 let labelPnt2 = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius + 8.0, azi + 5.0);
                 this._parts.outerCircle.createTextPath({
@@ -284,9 +297,7 @@ class CompassPlus extends declared(Widget) {
                     size: fontSize
                 }).setFill(fontColor);
             }
-
         }
-
     }
 
     // UPDATE OUTER CIRCLE AND INDICATORS //
@@ -317,7 +328,7 @@ class CompassPlus extends declared(Widget) {
                 y1: this._parts.nodeCenter.y - horizonY,
                 x2: this._parts.nodeBox.w,
                 y2: this._parts.nodeCenter.y - horizonY
-            }).setStroke({color: this.style.horizonColor, style: "dash", width: 1.5}).setClip(clipGeometry);
+            }).setStroke({color: this._style.horizonColor, style: "dash", width: 1.5}).setClip(clipGeometry);
 
             // AZIMUTH //
             let arrowWidth = 1.5;
@@ -328,14 +339,14 @@ class CompassPlus extends declared(Widget) {
                 y1: indicatorPnt.y,
                 x2: indicatorLabelPnt.x,
                 y2: indicatorLabelPnt.y - 20.0
-            }).setStroke({color: this.style.indicatorColor, style: "dot", width: arrowWidth});
+            }).setStroke({color: this._style.indicatorColor, style: "dot", width: arrowWidth});
             this._parts.indicators.createText({
                 x: indicatorLabelPnt.x,
                 y: indicatorLabelPnt.y,
                 align: "middle",
                 text: heading.toFixed(0) + "°",
                 kerning: true
-            }).setFont(this.style.indicatorFont).setFill(this.style.indicatorColor);
+            }).setFont(this._style.indicatorFont).setFill(this._style.indicatorColor);
 
             // COORDINATE, ALTITUDE, AND SCALE INFO //
             let ddPrecision = (this.view.zoom < 9) ? 1 : (Math.floor(this.view.zoom / 3) - 1);
@@ -352,7 +363,7 @@ class CompassPlus extends declared(Widget) {
                 align: "middle",
                 text: lang.replace("{lon}, {lat}", coordinateInfo),
                 kerning: true
-            }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
+            }).setFont(this._style.coordinateFont).setFill(this._style.fontColorMajor);
             // ALTITUDE TEXT //
             this._parts.indicators.createText({
                 x: this._parts.nodeCenter.x,
@@ -360,7 +371,7 @@ class CompassPlus extends declared(Widget) {
                 align: "middle",
                 text: lang.replace("{alt} m", coordinateInfo),
                 kerning: true
-            }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
+            }).setFont(this._style.coordinateFont).setFill(this._style.fontColorMajor);
             // SCALE TEXT //
             this._parts.indicators.createText({
                 x: this._parts.nodeCenter.x,
@@ -368,7 +379,7 @@ class CompassPlus extends declared(Widget) {
                 align: "middle",
                 text: lang.replace("1: {scale}", coordinateInfo),
                 kerning: true
-            }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
+            }).setFont(this._style.coordinateFont).setFill(this._style.fontColorMajor);
 
         }
 
@@ -385,3 +396,4 @@ class CompassPlus extends declared(Widget) {
 
 }
 export = CompassPlus;
+

@@ -48,11 +48,13 @@
         });
         view.then(function () {
 
+          // BASEMAP TOGGLE //
           let basemapToggle = new BasemapToggle({
             view: view,
             nextBasemap: "topo"
           });
           view.ui.add(basemapToggle, { position: "top-left", index: 0 });
+
 
           // DEFAULT //
           let compassPlus = new CompassPlus({ view: view });
@@ -63,14 +65,21 @@
             view: view,
             size: CompassPlus.SIZES.LARGER
           });
-          view.ui.add(compassPlus2, "bottom-right");
+          view.ui.add(compassPlus2, "bottom-left");
 
           // DARK THEME //
           let compassPlus3 = new CompassPlus({
             view: view,
             style: CompassPlus.STYLES.DARK
           });
-          view.ui.add(compassPlus3, "top-right");
+          view.ui.add(compassPlus3, "bottom-left");
+
+          let compassPlus4 = new CompassPlus({
+            view: view,
+            size: CompassPlus.SIZES.LARGER,
+            style: CompassPlus.STYLES.DARK
+          });
+          view.ui.add(compassPlus4, "bottom-left");
 
         }.bind(this));
 

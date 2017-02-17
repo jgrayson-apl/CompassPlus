@@ -16,7 +16,8 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
     // WIDGET CSS //
     var CSS = {
         base: "apl-compass-plus",
-        size_larger: "apl-compass-plus-larger"
+        size_larger: "apl-compass-plus-larger",
+        not_visible: "apl-compass-plus-hidden"
     };
     // DEFAULT FONT //
     var CompassDefaultFont = (function () {
@@ -85,19 +86,30 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
     var CompassPlus = (function (_super) {
         __extends(CompassPlus, _super);
         function CompassPlus() {
-            _super.call(this);
+            _super.apply(this, arguments);
+            // VISIBLE //
+            this.visible = true;
+            // VIEW //
+            this.view = null;
+            // SIZE //
             this.size = CompassPlus.SIZES.DEFAULT;
+            // STYLE //
+            this._style = new CompassDefaultStyle();
+            // GFX PARTS //
             this._parts = new CompassParts();
+            // WIDGET READY //
             this._ready = false;
         }
         Object.defineProperty(CompassPlus.prototype, "style", {
+            // STYLE //
             get: function () {
-                return this._get("style");
+                return this._style;
             },
             set: function (value) {
                 var oldValue = this._get("style");
                 if (oldValue !== value) {
                     this._set("style", value);
+                    this._style = value;
                     this._styleUpdated();
                 }
             },
@@ -113,6 +125,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
         // JSX RENDER //
         CompassPlus.prototype.render = function () {
             var classes = (_a = {},
+                _a[CSS.not_visible] = (!this.visible),
                 _a[CSS.size_larger] = (this.size === CompassPlus.SIZES.LARGER),
                 _a
             );
@@ -164,16 +177,16 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 cy: this._parts.nodeCenter.y,
                 r: this._parts.outerRadius
             }).setStroke({
-                color: this.style.lineColor,
+                color: this._style.lineColor,
                 style: "solid",
-                width: this.style.lineWidthMajor
-            }).setFill(this.style.fillColor);
+                width: this._style.lineWidthMajor
+            }).setFill(this._style.fillColor);
             // CENTER //
             this._parts.outerCircle.createCircle({
                 cx: this._parts.nodeCenter.x,
                 cy: this._parts.nodeCenter.y,
                 r: 5.0
-            }).setFill(this.style.lineColor);
+            }).setFill(this._style.lineColor);
             /*var centerLength = 40.0;
              var centerWidth = 2.0;
              // N - S //
@@ -204,11 +217,11 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                         align: "middle",
                         text: direction,
                     }).moveTo(directionLabelPnt.x, directionLabelPnt.y).lineTo(directionLabelPnt2.x, directionLabelPnt2.y)
-                        .setFont(this.style.directionFont).setFill(this.style.fontColorMajor);
+                        .setFont(this._style.directionFont).setFill(this._style.fontColorMajor);
                 }
             }
             // AZIMUTHS //
-            var lineStroke = { color: this.style.lineColor, style: "solid", width: this.style.lineWidthMinor };
+            var lineStroke = { color: this._style.lineColor, style: "solid", width: this._style.lineWidthMinor };
             for (var azi = 0.0; azi < 360.0; azi += 5.0) {
                 var lineLength = (azi % 15 === 0) ? 20.0 : 5.0;
                 var outerPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius, azi);
@@ -219,7 +232,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 }).setStroke(lineStroke);
                 if (azi % 15 === 0) {
                     var fontSize = (azi % 45 === 0) ? CompassDefaultFont.sizeNormal : CompassDefaultFont.sizeSmallest;
-                    var fontColor = (azi % 45 === 0) ? this.style.fontColorMajor : this.style.fontColorMinor;
+                    var fontColor = (azi % 45 === 0) ? this._style.fontColorMajor : this._style.fontColorMinor;
                     var labelPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius + 8.0, azi - 5.0);
                     var labelPnt2 = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius + 8.0, azi + 5.0);
                     this._parts.outerCircle.createTextPath({
@@ -260,7 +273,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                     y1: this._parts.nodeCenter.y - horizonY,
                     x2: this._parts.nodeBox.w,
                     y2: this._parts.nodeCenter.y - horizonY
-                }).setStroke({ color: this.style.horizonColor, style: "dash", width: 1.5 }).setClip(clipGeometry);
+                }).setStroke({ color: this._style.horizonColor, style: "dash", width: 1.5 }).setClip(clipGeometry);
                 // AZIMUTH //
                 var arrowWidth = 1.5;
                 var indicatorPnt = CompassPlus._pointTo(this._parts.nodeCenter, this._parts.outerRadius, 0.0);
@@ -270,14 +283,14 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                     y1: indicatorPnt.y,
                     x2: indicatorLabelPnt.x,
                     y2: indicatorLabelPnt.y - 20.0
-                }).setStroke({ color: this.style.indicatorColor, style: "dot", width: arrowWidth });
+                }).setStroke({ color: this._style.indicatorColor, style: "dot", width: arrowWidth });
                 this._parts.indicators.createText({
                     x: indicatorLabelPnt.x,
                     y: indicatorLabelPnt.y,
                     align: "middle",
                     text: heading.toFixed(0) + "°",
                     kerning: true
-                }).setFont(this.style.indicatorFont).setFill(this.style.indicatorColor);
+                }).setFont(this._style.indicatorFont).setFill(this._style.indicatorColor);
                 // COORDINATE, ALTITUDE, AND SCALE INFO //
                 var ddPrecision = (this.view.zoom < 9) ? 1 : (Math.floor(this.view.zoom / 3) - 1);
                 var coordinateInfo = {
@@ -293,7 +306,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                     align: "middle",
                     text: lang.replace("{lon}, {lat}", coordinateInfo),
                     kerning: true
-                }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
+                }).setFont(this._style.coordinateFont).setFill(this._style.fontColorMajor);
                 // ALTITUDE TEXT //
                 this._parts.indicators.createText({
                     x: this._parts.nodeCenter.x,
@@ -301,7 +314,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                     align: "middle",
                     text: lang.replace("{alt} m", coordinateInfo),
                     kerning: true
-                }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
+                }).setFont(this._style.coordinateFont).setFill(this._style.fontColorMajor);
                 // SCALE TEXT //
                 this._parts.indicators.createText({
                     x: this._parts.nodeCenter.x,
@@ -309,7 +322,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                     align: "middle",
                     text: lang.replace("1: {scale}", coordinateInfo),
                     kerning: true
-                }).setFont(this.style.coordinateFont).setFill(this.style.fontColorMajor);
+                }).setFont(this._style.coordinateFont).setFill(this._style.fontColorMajor);
             }
         };
         // CALCULATE END LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH //
@@ -332,6 +345,10 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             DEFAULT: new CompassDefaultStyle(),
             DARK: new CompassDarkStyle()
         };
+        __decorate([
+            decorators_1.property(),
+            widget_1.renderable()
+        ], CompassPlus.prototype, "visible", void 0);
         __decorate([
             decorators_1.property()
         ], CompassPlus.prototype, "view", void 0);

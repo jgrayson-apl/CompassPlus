@@ -9,3 +9,7 @@
   width  : 450px;
   height : 450px;
 }
+
+.apl-compass-plus-hidden {
+  display : none;
+}
