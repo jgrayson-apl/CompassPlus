@@ -11,13 +11,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/core/tsSupport/decorateHelper", "esri/core/accessorSupport/decorators", "esri/widgets/Widget", "esri/core/watchUtils", "esri/widgets/support/widget", "dojo/colors", "dojo/_base/lang", "dojo/number", "dojo/dom-geometry", "dojox/gfx", "dojox/gfx/matrix"], function (require, exports, __extends, __decorate, decorators_1, Widget, watchUtils, widget_1, Color, lang, dojoNumber, domGeom, gfx, matrix) {
+define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/core/tsSupport/decorateHelper", "esri/core/accessorSupport/decorators", "esri/widgets/Widget", "esri/core/watchUtils", "esri/widgets/support/widget", "dojo/colors", "dojo/_base/lang", "dojo/number", "dojox/gfx", "dojox/gfx/matrix"], function (require, exports, __extends, __decorate, decorators_1, Widget, watchUtils, widget_1, Color, lang, dojoNumber, gfx, matrix) {
     "use strict";
     // WIDGET CSS //
     var CSS = {
         base: "apl-compass-plus",
-        size_larger: "apl-compass-plus-larger",
-        not_visible: "apl-compass-plus-hidden"
+        hidden: "apl-compass-plus-hidden"
     };
     // DEFAULT FONT //
     var CompassDefaultFont = (function () {
@@ -87,10 +86,10 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
         __extends(CompassPlus, _super);
         function CompassPlus() {
             _super.apply(this, arguments);
-            // VISIBLE //
-            this.visible = true;
             // VIEW //
             this.view = null;
+            // VISIBLE //
+            this.visible = true;
             // SIZE //
             this.size = CompassPlus.SIZES.DEFAULT;
             // STYLE //
@@ -116,35 +115,49 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             enumerable: true,
             configurable: true
         });
-        // POST INITIALIZE //
+        /**
+         * POST INITIALIZE
+         */
         CompassPlus.prototype.postInitialize = function () {
             var _this = this;
             // CAMERA HEADING //
             watchUtils.init(this, "view.camera.heading", function (heading) { return _this._updateIndicators(heading); });
         };
-        // JSX RENDER //
+        /**
+         * JSX RENDER
+         *
+         * @returns {any}
+         */
         CompassPlus.prototype.render = function () {
+            var dynamicStyles = {
+                width: this.size + "px",
+                height: this.size + "px"
+            };
             var classes = (_a = {},
-                _a[CSS.not_visible] = (!this.visible),
-                _a[CSS.size_larger] = (this.size === CompassPlus.SIZES.LARGER),
+                _a[CSS.hidden] = (!this.visible),
                 _a
             );
-            return (widget_1.jsxFactory.createElement("div", {bind: this, class: CSS.base, classes: classes, afterCreate: this._initializeCompass}));
+            return (widget_1.jsxFactory.createElement("div", {bind: this, class: CSS.base, classes: classes, styles: dynamicStyles, afterCreate: this._initializeCompass}));
             var _a;
         };
-        // RESET HEADING //
+        /**
+         * RESET HEADING
+         */
         CompassPlus.prototype.reset = function () {
             this.view.goTo({ heading: 0.0 });
         };
-        // INITIALIZE COMPASS //
+        /**
+         * INITIALIZE COMPASS
+         *
+         * @param containerNode
+         * @private
+         */
         CompassPlus.prototype._initializeCompass = function (containerNode) {
-            // NODE CONTENT BOX //
-            this._parts.nodeBox = domGeom.getContentBox(containerNode);
             // CENTER AND RADIUS //
-            this._parts.nodeCenter = { x: this._parts.nodeBox.w * 0.5, y: this._parts.nodeBox.h * 0.5 };
-            this._parts.outerRadius = (this._parts.nodeBox.h * 0.4);
+            this._parts.nodeCenter = { x: this.size * 0.5, y: this.size * 0.5 };
+            this._parts.outerRadius = (this.size * 0.4);
             // GFX SURFACE //
-            this._parts.surface = gfx.createSurface(containerNode, this._parts.nodeBox.w, this._parts.nodeBox.h);
+            this._parts.surface = gfx.createSurface(containerNode, this.size, this.size);
             // GROUP - INDICATORS: AZIMUTH, HORIZON, COORDINATES, ALTITUDE, SCALE //
             this._parts.indicators = this._parts.surface.createGroup();
             // GROUP - OUTER CIRCLE WITH AZIMUTHS //
@@ -157,6 +170,10 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             // READY //
             this._ready = true;
         };
+        /**
+         *
+         * @private
+         */
         CompassPlus.prototype._styleUpdated = function () {
             if (this._ready) {
                 // CREATE OUTER CIRCLE //
@@ -167,6 +184,10 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 this.scheduleRender();
             }
         };
+        /**
+         *
+         * @private
+         */
         CompassPlus.prototype._updateOuterCircle = function () {
             if (this._parts.outerCircle) {
                 this._parts.outerCircle.clear();
@@ -249,7 +270,12 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 }
             }
         };
-        // UPDATE OUTER CIRCLE AND INDICATORS //
+        /**
+         * UPDATE OUTER CIRCLE AND INDICATORS
+         *
+         * @param heading number
+         * @private
+         */
         CompassPlus.prototype._updateIndicators = function (heading) {
             // UPDATE OUTER CIRCLE //
             if (this._parts.outerCircle) {
@@ -271,7 +297,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 this._parts.indicators.createLine({
                     x1: 0,
                     y1: this._parts.nodeCenter.y - horizonY,
-                    x2: this._parts.nodeBox.w,
+                    x2: this.size,
                     y2: this._parts.nodeCenter.y - horizonY
                 }).setStroke({ color: this._style.horizonColor, style: "dash", width: 1.5 }).setClip(clipGeometry);
                 // AZIMUTH //
@@ -325,7 +351,15 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
                 }).setFont(this._style.coordinateFont).setFill(this._style.fontColorMajor);
             }
         };
-        // CALCULATE END LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH //
+        /**
+         * CALCULATE END LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH
+         *
+         * @param p
+         * @param dist
+         * @param azimuth
+         * @returns {{x: number, y: number}}
+         * @private
+         */
         CompassPlus._pointTo = function (p, dist, azimuth) {
             var radians = (-azimuth + 90.0) * (Math.PI / 180.0);
             return {
@@ -337,8 +371,8 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
         CompassPlus.version = "0.0.1";
         // SIZES //
         CompassPlus.SIZES = {
-            DEFAULT: 0,
-            LARGER: 1
+            DEFAULT: 300,
+            LARGER: 450
         };
         // STYLES //
         CompassPlus.STYLES = {
@@ -346,14 +380,15 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             DARK: new CompassDarkStyle()
         };
         __decorate([
+            decorators_1.property()
+        ], CompassPlus.prototype, "view", void 0);
+        __decorate([
             decorators_1.property(),
             widget_1.renderable()
         ], CompassPlus.prototype, "visible", void 0);
         __decorate([
-            decorators_1.property()
-        ], CompassPlus.prototype, "view", void 0);
-        __decorate([
-            decorators_1.property()
+            decorators_1.property(),
+            widget_1.renderable()
         ], CompassPlus.prototype, "size", void 0);
         __decorate([
             decorators_1.property()

@@ -23,8 +23,7 @@ import matrix = require("dojox/gfx/matrix");
 // WIDGET CSS //
 const CSS = {
     base: "apl-compass-plus",
-    size_larger: "apl-compass-plus-larger",
-    not_visible: "apl-compass-plus-hidden"
+    hidden: "apl-compass-plus-hidden"
 };
 
 // DEFAULT FONT //
@@ -79,7 +78,6 @@ class CompassDarkStyle extends CompassDefaultStyle {
 
 // COMPASS PARTS //
 class CompassParts {
-    nodeBox: dojo.DomGeometryBox;
     nodeCenter: gfx.Point;
     outerRadius: number;
     surface: gfx.Surface;
@@ -96,8 +94,8 @@ class CompassPlus extends declared(Widget) {
 
     // SIZES //
     public static SIZES = {
-        DEFAULT: 0,
-        LARGER: 1
+        DEFAULT: 300,
+        LARGER: 450
     };
 
     // STYLES //
@@ -106,17 +104,18 @@ class CompassPlus extends declared(Widget) {
         DARK: new CompassDarkStyle()
     };
 
+    // VIEW //
+    @property()
+    public view: SceneView = null;
+
     // VISIBLE //
     @property()
     @renderable()
     public visible: boolean = true;
 
-    // VIEW //
-    @property()
-    public view: SceneView = null;
-
     // SIZE //
     @property()
+    @renderable()
     public size: number = CompassPlus.SIZES.DEFAULT;
 
     // STYLE //
@@ -143,42 +142,57 @@ class CompassPlus extends declared(Widget) {
     // WIDGET READY //
     private _ready: boolean = false;
 
-    // POST INITIALIZE //
+    /**
+     * POST INITIALIZE
+     */
     postInitialize() {
         // CAMERA HEADING //
         watchUtils.init(this, "view.camera.heading", (heading) => this._updateIndicators(heading));
+
     }
 
-    // JSX RENDER //
+    /**
+     * JSX RENDER
+     *
+     * @returns {any}
+     */
     render() {
 
+        const dynamicStyles = {
+            width: this.size + "px",
+            height: this.size + "px"
+        };
+
         const classes = {
-            [CSS.not_visible]: (!this.visible),
-            [CSS.size_larger]: (this.size === CompassPlus.SIZES.LARGER)
+            [CSS.hidden]: (!this.visible)
         };
 
         return (
-            <div bind={this} class={CSS.base} classes={classes} afterCreate={this._initializeCompass}></div>
+            <div bind={this} class={CSS.base} classes={classes} styles={dynamicStyles} afterCreate={this._initializeCompass}></div>
         );
     }
 
-    // RESET HEADING //
+    /**
+     * RESET HEADING
+     */
     protected reset(): void {
         this.view.goTo({heading: 0.0});
     }
 
-    // INITIALIZE COMPASS //
+    /**
+     * INITIALIZE COMPASS
+     *
+     * @param containerNode
+     * @private
+     */
     private _initializeCompass(containerNode: Element): void {
 
-        // NODE CONTENT BOX //
-        this._parts.nodeBox = domGeom.getContentBox(containerNode);
-
         // CENTER AND RADIUS //
-        this._parts.nodeCenter = {x: this._parts.nodeBox.w * 0.5, y: this._parts.nodeBox.h * 0.5};
-        this._parts.outerRadius = (this._parts.nodeBox.h * 0.4);
+        this._parts.nodeCenter = {x: this.size * 0.5, y: this.size * 0.5};
+        this._parts.outerRadius = (this.size * 0.4);
 
         // GFX SURFACE //
-        this._parts.surface = gfx.createSurface(containerNode, this._parts.nodeBox.w, this._parts.nodeBox.h);
+        this._parts.surface = gfx.createSurface(containerNode, this.size, this.size);
 
         // GROUP - INDICATORS: AZIMUTH, HORIZON, COORDINATES, ALTITUDE, SCALE //
         this._parts.indicators = this._parts.surface.createGroup();
@@ -196,7 +210,10 @@ class CompassPlus extends declared(Widget) {
         this._ready = true;
     }
 
-
+    /**
+     *
+     * @private
+     */
     private _styleUpdated(): void {
         if (this._ready) {
             // CREATE OUTER CIRCLE //
@@ -208,6 +225,10 @@ class CompassPlus extends declared(Widget) {
         }
     }
 
+    /**
+     *
+     * @private
+     */
     private _updateOuterCircle(): void {
 
         if (this._parts.outerCircle) {
@@ -300,7 +321,12 @@ class CompassPlus extends declared(Widget) {
         }
     }
 
-    // UPDATE OUTER CIRCLE AND INDICATORS //
+    /**
+     * UPDATE OUTER CIRCLE AND INDICATORS
+     *
+     * @param heading number
+     * @private
+     */
     private _updateIndicators(heading: number): void {
 
         // UPDATE OUTER CIRCLE //
@@ -326,7 +352,7 @@ class CompassPlus extends declared(Widget) {
             this._parts.indicators.createLine({
                 x1: 0,
                 y1: this._parts.nodeCenter.y - horizonY,
-                x2: this._parts.nodeBox.w,
+                x2: this.size,
                 y2: this._parts.nodeCenter.y - horizonY
             }).setStroke({color: this._style.horizonColor, style: "dash", width: 1.5}).setClip(clipGeometry);
 
@@ -385,7 +411,15 @@ class CompassPlus extends declared(Widget) {
 
     }
 
-    // CALCULATE END LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH //
+    /**
+     * CALCULATE END LOCATION BASED ON STARTING LOCATION, DISTANCE, AND AZIMUTH
+     *
+     * @param p
+     * @param dist
+     * @param azimuth
+     * @returns {{x: number, y: number}}
+     * @private
+     */
     private static _pointTo(p: gfx.Point, dist: number, azimuth: number): gfx.Point {
         let radians = (-azimuth + 90.0) * (Math.PI / 180.0);
         return {
