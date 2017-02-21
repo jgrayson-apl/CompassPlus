@@ -160,7 +160,7 @@ class CompassPlus extends declared(Widget) {
         const dynamicStyles = {
             width: this.size + "px",
             height: this.size + "px",
-            display: this.visible ? "" : "display:none"
+            display: this.visible ? "" : "none"
         };
 
         return (

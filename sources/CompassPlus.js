@@ -131,7 +131,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
             var dynamicStyles = {
                 width: this.size + "px",
                 height: this.size + "px",
-                display: this.visible ? "" : "display:none"
+                display: this.visible ? "" : "none"
             };
             return (widget_1.jsxFactory.createElement("div", {bind: this, class: CSS.base, styles: dynamicStyles, afterCreate: this._initializeCompass}));
         };
