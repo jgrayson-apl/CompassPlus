@@ -15,8 +15,7 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
     "use strict";
     // WIDGET CSS //
     var CSS = {
-        base: "apl-compass-plus",
-        hidden: "apl-compass-plus-hidden"
+        base: "apl-compass-plus"
     };
     // DEFAULT FONT //
     var CompassDefaultFont = (function () {
@@ -131,14 +130,10 @@ define(["require", "exports", "esri/core/tsSupport/declareExtendsHelper", "esri/
         CompassPlus.prototype.render = function () {
             var dynamicStyles = {
                 width: this.size + "px",
-                height: this.size + "px"
+                height: this.size + "px",
+                display: this.visible ? "" : "display:none"
             };
-            var classes = (_a = {},
-                _a[CSS.hidden] = (!this.visible),
-                _a
-            );
-            return (widget_1.jsxFactory.createElement("div", {bind: this, class: CSS.base, classes: classes, styles: dynamicStyles, afterCreate: this._initializeCompass}));
-            var _a;
+            return (widget_1.jsxFactory.createElement("div", {bind: this, class: CSS.base, styles: dynamicStyles, afterCreate: this._initializeCompass}));
         };
         /**
          * RESET HEADING

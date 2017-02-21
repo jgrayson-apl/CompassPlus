@@ -22,8 +22,7 @@ import matrix = require("dojox/gfx/matrix");
 
 // WIDGET CSS //
 const CSS = {
-    base: "apl-compass-plus",
-    hidden: "apl-compass-plus-hidden"
+    base: "apl-compass-plus"
 };
 
 // DEFAULT FONT //
@@ -160,15 +159,12 @@ class CompassPlus extends declared(Widget) {
 
         const dynamicStyles = {
             width: this.size + "px",
-            height: this.size + "px"
-        };
-
-        const classes = {
-            [CSS.hidden]: (!this.visible)
+            height: this.size + "px",
+            display: this.visible ? "" : "display:none"
         };
 
         return (
-            <div bind={this} class={CSS.base} classes={classes} styles={dynamicStyles} afterCreate={this._initializeCompass}></div>
+            <div bind={this} class={CSS.base} styles={dynamicStyles} afterCreate={this._initializeCompass}></div>
         );
     }
 
